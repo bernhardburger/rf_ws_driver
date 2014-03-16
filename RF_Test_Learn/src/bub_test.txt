@@ -1,0 +1,24 @@
+*** Settings ***
+Library           Remote    http://127.0.0.1:8270/
+Library           Selenium2Library
+
+*** Test Cases ***
+check
+    Helo
+    Helo arg    234
+
+openBR
+    Open Browser    http://astrodoxa.doxatheca.com    gc
+    close browser
+
+check template "${arg}"
+    [Template]    check kw "${arg}"
+    0
+    12345
+    hello, dolly
+    und jetzt eine wirklich langer string mit Sonderzeichen drinnen %!§"%)(/"§)(/§"!=)$/
+
+*** Keywords ***
+check kw "${arg}"
+    [Documentation]    base template for data driven TC
+    helo arg    ${arg}

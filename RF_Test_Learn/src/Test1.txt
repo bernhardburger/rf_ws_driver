@@ -1,0 +1,46 @@
+*** Settings ***
+Documentation     This is the first test for using robotframework
+Suite Setup       Open Browser    http://astrodoxa.doxatheca.com/    browser= gc
+Suite Teardown    Close Browser
+Library           BUB_Self_Check
+
+*** Test Cases ***
+navigate_to_wikipedia
+    [Tags]    EN
+    Go to    http://www.wikipedia.org
+    Input Text    id=searchInput    ASDF
+    Select from list    id=searchLanguage    English
+    Click Button    name=go
+    Capture Page Screenshot    asdf
+    Page should Contain Link    link= Alabama State Defense Force
+    Go Back
+    simple keyword
+    Greet
+
+navigate_to_wikipedia_ and_asdf
+    [Tags]    DE
+    [Template]    Navigating Template
+    Go to    http://www.wikipedia.org
+    Input Text    id=searchInput    ASDF
+    Select from list    id=searchLanguage    Deutsch
+    Click Button    name=go
+    Capture Page Screenshot    ASDF2
+    Page should Contain Link    link= Alabama State Defense Force
+    Go Back
+
+Normal test case with embedded arguments
+    The result of 1 + 1 should be 2
+    The result of 1 + 2 should be 3
+
+Template with embedded arguments
+    [Template]    The result of ${calculation} should be ${expected}
+    1 + 1    2
+    1 + 2    3
+
+bub
+    Helo
+
+*** Keywords ***
+The result of ${calculation} should be ${expected}
+    ${result} =    Calculate    ${calculation}
+    Should Be Equal    ${result}    ${expected}

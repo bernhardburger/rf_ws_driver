@@ -1,0 +1,49 @@
+*** Settings ***
+Documentation     Deployment:
+...               this suite shall test the deployment of releases to the environment, the installation and check that the systems are up and running
+
+*** Variables ***
+
+*** Test Cases ***
+Install new Service Cloud
+    [Documentation]    Test goal: *simple install* joyride
+    ...
+    ...    This is the sunshine scenario: upload files to bucket, bootstrap the ServiceCloud, everything will be fine
+    Start_BucketBrigade_WS_for_upload    ${validSourcePath}    ${validDataBucket}
+    Trigger_SC_Bootstrap    ${validServiceCloudID}
+    Wait_For_SC_Start_Complete    ${validServiceCloudID}
+
+Start BucketBrigade with "${wrongSourcePath}" or "${wrong_address}" ends in error
+    [Documentation]    teplate data for incorrect upload start
+    [Template]    Start BucketBrigade with "${wrongSourcePath}" or "${wrong_address}" ends in error
+    c:\sourcepath    ${EMPTY}
+    ${EMPTY}    correct_address
+    correct path    wrong adress
+
+Propagate Version from "${SourceBucket}" to "${DestinationBucket}" shall end in "${Result}"
+    valid Source    valid target    OK
+    valid source    invalid target    NOK
+    invalid source    valid target    NOK
+    invalid source    invalid target    NOK
+    valid source    locked Target    NOK
+
+*** Keywords ***
+Start_BucketBrigade_WS_for_upload
+    [Arguments]    ${SourcePath}    ${TargetBucket}
+    [Documentation]    This action starts the Bucket Brigade Webservice to upload data from the given Source Path to the Target S3 Bucket
+
+Trigger_SC_Bootstrap
+    [Arguments]    ${ServiceCloudID}
+    [Documentation]    This Action shall start a Service Cloud *AND* Trigger the bootstrap
+
+Wait_For_SC_Start_Complete
+    [Arguments]    ${ServiceCloudID}    ${timeout}=600
+    [Documentation]    This function waits for a smephoire from a SC that the install/update/start process is finished and the SC is ready
+
+Start BucketBrigade with "${wrongSourcePath}" or "${wrong_address}" ends in error
+    Start_BucketBrigade_WS_for_upload    ${wrongSourcePath}    ${wrong_address}
+    Ensure WS error
+
+Propagate Version from "${SourceBucket}" to "${DestinationBucket}"
+    [Documentation]    This action will trigger the Bucket Brigade WS to move bins from source to target buckets and will return a result OK or NOK
+    [Return]    ${Result}
