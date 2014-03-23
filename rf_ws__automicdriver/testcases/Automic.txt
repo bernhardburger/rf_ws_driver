@@ -1,0 +1,59 @@
+*** Settings ***
+Suite Setup       Remote AE Lib Start
+Suite Teardown    Stop Remote Server
+Test Timeout      10 minutes
+Library           Remote    http://127.0.0.1:8270/
+Library           OperatingSystem
+
+*** Test Cases ***
+CreateObject
+    [Documentation]    Create Object
+    [Template]    createObj
+    AAA    JOBF    DAG
+    BBB    SCRI    DAG
+    1234567890_    JOBP    DAG
+    1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_12    JOBP    DAG
+
+CreateObjectfail
+    [Documentation]    Create Object
+    [Template]    creatObjErr
+    AAA    JOBF    DAG    An object named 'AAA' already exists.*
+    bbb    SCRI    DAG    An object named 'BBB' already exists.*
+    \    JOBI    DAG    *UC4 object name must not be empty*
+    &/AKJHSKJ    EVNT.TIME    DAG    *Invalid UC4 Object/Alias name: '&/AKJHSKJ'*
+    1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_123    SCRI    DAG    *Invalid UC4 Object/Alias name:*
+
+Search1
+    [Documentation]    test the search keywoird an returning lists
+    Initialize Search
+    Search    *    DAG    true
+    @{searchreturn}=    Get Search Result Names
+    @{searchretpath}=    Get Search Result Folders
+
+DeleteObject
+    [Documentation]    Test the delete action
+    [Template]    deleteObj
+    AAA
+    BBB
+    1234567890_
+    1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_12
+
+*** Keywords ***
+createObj
+    [Arguments]    ${name}    ${template}    ${folder}
+    Create Object    ${name}    ${template}    ${folder}
+
+Remote AE Lib Start
+    [Documentation]    Starts the Batch file for the Jremoteserver
+    ConnectAndLogin    10.0.0.6    3217    999    tf    tf    tf
+    ...    E
+
+creatObjErr
+    [Arguments]    ${name}    ${template}    ${folder}    ${errmsg}
+    [Documentation]    template for expecting errors on creating keyword
+    run Keyword and expect error    ${errmsg}    Create Object    ${name}    ${template}    ${folder}
+
+deleteObj
+    [Arguments]    ${objectName}
+    [Documentation]    delete Object template - deletes an object give by name
+    Delete Object    ${objectName}
