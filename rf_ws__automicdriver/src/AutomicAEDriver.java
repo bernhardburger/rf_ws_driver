@@ -8,6 +8,7 @@ import java.util.List;
 import com.uc4.*;
 import com.uc4.communication.Connection;
 import com.uc4.api.SearchResultItem;
+import com.uc4.api.StatisticSearchItem;
 import com.uc4.api.Template;
 import com.uc4.api.UC4ObjectName;
 import com.uc4.api.UC4UserName;
@@ -327,10 +328,24 @@ public class AutomicAEDriver {
 	
 	/**
 	 * 	Returns the end state of an execution run id - to be implemented
+	 * @throws IOException 
 	 */
 	
-	public void Get_End_State_by_RUNID(int rundIN){
+	public String Get_End_State_by_RUNID(String runID) throws IOException{
 		System.out.println("Get End Status by RunID");
+		String state = "";
+		GenericStatistics genstat = new GenericStatistics();
+		
+		genstat.setRunID(runID);
+		
+		uc4.sendRequestAndWait(genstat);
+		Iterator it = genstat.resultIterator();
+		if (it.hasNext()){
+			StatisticSearchItem item = (StatisticSearchItem) it.next();
+			state= item.getStatus();
+		}
+		
+		return state;
 		
 		
 		

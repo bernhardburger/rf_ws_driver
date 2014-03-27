@@ -4,6 +4,7 @@ Suite Teardown    Stop Remote Server
 Test Timeout      10 minutes
 Library           Remote    http://127.0.0.1:8270/
 Library           OperatingSystem
+Library           HttpLibrary.HTTP
 
 *** Test Cases ***
 CreateObject
@@ -13,6 +14,11 @@ CreateObject
     BBB    SCRI    DAG
     1234567890_    JOBP    DAG
     1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_12    JOBP    DAG
+
+Execute BBB
+    ${runID}=    Execute Object    BBB
+    ${state}=    Get End State by RunID    ${runID}
+    LOG    ${state}
 
 CreateObjectfail
     [Documentation]    Create Object
@@ -38,14 +44,30 @@ DeleteObject
     1234567890_
     1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_12
 
+Get_BucketBrigade_Test
+    [Documentation]    Get Test of Bucket Brigade
+    Create HTTP Context    vwghyk01:4711    http
+    GET    /cloud/automatix/dev/ecc/runningStack
+    ${reply}=    Get Response Body
+    log json    ${reply}
+    Json value should equal    ${reply}    /Description    "ECC"
+    Json value should equal    ${reply}    /StackStatus    "CREATE_COMPLETE"
+
+Get_BucketBrigade_Test_2
+    [Documentation]    ${Stackname} | ${stage} | ${component}
+    [Template]    GET_BUCKETBRIGADE_STATE
+    automatix    dev    ecc
+    automatix    dev    ae
+    automatix    dev    sapi
+
 *** Keywords ***
 createObj
     [Arguments]    ${name}    ${template}    ${folder}
     Create Object    ${name}    ${template}    ${folder}
 
 Remote AE Lib Start
-    [Documentation]    Starts the Batch file for the Jremoteserver
-    ConnectAndLogin    10.0.0.6    3217    999    tf    tf    tf
+    [Documentation]    Sets the AE Parameters and logs in
+    ConnectAndLogin    127.0.0.1    3217    999    tf    tf    tf
     ...    E
 
 creatObjErr
@@ -57,3 +79,19 @@ deleteObj
     [Arguments]    ${objectName}
     [Documentation]    delete Object template - deletes an object give by name
     Delete Object    ${objectName}
+
+Uppercase
+    [Arguments]    ${string}
+    [Return]    ${string.upper()}
+
+GET_BUCKETBRIGADE_STATE
+    [Arguments]    ${Stackname}    ${stage}    ${component}
+    Create HTTP Context    vwghyk01:4711    http
+    ${address}=    Catenate    SEPARATOR=    /cloud/    ${Stackname}    /    ${stage}
+    ...    /    ${component}    /    runningStack
+    GET    ${address}
+    ${reply}=    Get Response Body
+    log json    ${reply}
+    ${CP_Upper}=    Uppercase    ${component}
+    Json value should equal    ${reply}    /Description    "${CP_Upper}"
+    Json value should equal    ${reply}    /StackStatus    "CREATE_COMPLETE"
